@@ -886,6 +886,22 @@ This example shows /last30days discovering **emerging developer workflows** - re
 
 At least one API key is required. X search works automatically if you're logged into x.com in your browser. YouTube search activates automatically when yt-dlp is in your PATH.
 
+## Troubleshooting
+
+### macOS: SSL Certificate Verify Failed
+
+If you see `[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate`, your Python installation is missing SSL root certificates. This only affects Python installed from python.org — **Homebrew users are not affected**.
+
+```bash
+# Check which Python you have
+which python3
+# Homebrew: /opt/homebrew/bin/python3 or /usr/local/bin/python3
+# Python.org: /Library/Frameworks/Python.framework/...
+
+# Fix: run the certificate installer (adjust version as needed)
+sudo "/Applications/Python 3.12/Install Certificates.command"
+```
+
 ## How It Works
 
 ### Two-Phase Search Architecture

@@ -1145,8 +1145,10 @@ def main():
     if x_source == 'bird':
         if available == 'reddit':
             available = 'both'  # Now have both Reddit + X (via Bird)
+        elif available == 'reddit-web':
+            available = 'all'  # Reddit + X (via Bird) + Web
         elif available == 'web':
-            available = 'x'  # Now have X via Bird
+            available = 'x-web'  # X via Bird + Web
 
     # Mock mode can work without keys
     if args.mock:
@@ -1360,6 +1362,8 @@ def main():
             source_info["x_skip_reason"] = "No Bird CLI or XAI_API_KEY (Node.js 22+ needed for Bird)"
     if not has_ytdlp:
         source_info["youtube_skip_reason"] = "yt-dlp not installed — fix: brew install yt-dlp"
+    elif has_ytdlp and not report.youtube:
+        source_info["youtube_skip_reason"] = "0 results (query may be too specific)"
     if not web_source:
         source_info["web_skip_reason"] = "assistant will use WebSearch (add BRAVE_API_KEY for native search)"
 
