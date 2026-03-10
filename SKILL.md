@@ -1,7 +1,7 @@
 ---
 name: last30days
 version: "2.9.5"
-description: "Research a topic from the last 30 days. Also triggered by 'last30'. Sources: Reddit, X, YouTube, TikTok, Instagram, Hacker News, Polymarket, web. Become an expert and write copy-paste-ready prompts."
+description: "Research a topic from the last 30 days. Also triggered by 'last30'. Sources: Reddit, X, Bluesky, YouTube, TikTok, Instagram, Hacker News, Polymarket, web. Become an expert and write copy-paste-ready prompts."
 argument-hint: 'last30 AI video tools, last30 best project management tools'
 allowed-tools: Bash, Read, Write, AskUserQuestion, WebSearch
 homepage: https://github.com/mvanhorn/last30days-skill
@@ -48,7 +48,7 @@ metadata:
 
 > **Permissions overview:** Reads public web/platform data and optionally saves research briefings to `~/Documents/Last30Days/`. X/Twitter search uses optional user-provided tokens (AUTH_TOKEN/CT0 env vars) — no browser session access. All credential usage and data writes are documented in the [Security & Permissions](#security--permissions) section.
 
-Research ANY topic across Reddit, X, YouTube, TikTok, Hacker News, Polymarket, and the web. Surface what people are actually discussing, recommending, betting on, and debating right now.
+Research ANY topic across Reddit, X, Bluesky, YouTube, TikTok, Hacker News, Polymarket, and the web. Surface what people are actually discussing, recommending, betting on, and debating right now.
 
 ## CRITICAL: Parse User Intent
 
@@ -60,6 +60,7 @@ Before doing anything, parse the user's input for:
    - **PROMPTING** - "X prompts", "prompting for X", "X best practices" → User wants to learn techniques and get copy-paste prompts
    - **RECOMMENDATIONS** - "best X", "top X", "what X should I use", "recommended X" → User wants a LIST of specific things
    - **NEWS** - "what's happening with X", "X news", "latest on X" → User wants current events/updates
+   - **COMPARISON** - "X vs Y", "X versus Y", "compare X and Y", "X or Y which is better" → User wants a side-by-side comparison
    - **GENERAL** - anything else → User wants broad understanding of the topic
 
 Common patterns:
@@ -68,6 +69,7 @@ Common patterns:
 - Just `[topic]` → "iOS design mockups" → TOOL NOT SPECIFIED, that's OK
 - "best [topic]" or "top [topic]" → QUERY_TYPE = RECOMMENDATIONS
 - "what are the best [topic]" → QUERY_TYPE = RECOMMENDATIONS
+- "X vs Y" or "X versus Y" → QUERY_TYPE = COMPARISON, TOPIC_A = X, TOPIC_B = Y (split on ` vs ` or ` versus ` with spaces)
 
 **IMPORTANT: Do NOT ask about target tool before research.**
 - If tool is specified in the query, use it
@@ -76,12 +78,14 @@ Common patterns:
 **Store these variables:**
 - `TOPIC = [extracted topic]`
 - `TARGET_TOOL = [extracted tool, or "unknown" if not specified]`
-- `QUERY_TYPE = [RECOMMENDATIONS | NEWS | HOW-TO | GENERAL]`
+- `QUERY_TYPE = [RECOMMENDATIONS | NEWS | HOW-TO | COMPARISON | GENERAL]`
+- `TOPIC_A = [first item]` (only if COMPARISON)
+- `TOPIC_B = [second item]` (only if COMPARISON)
 
 **DISPLAY your parsing to the user.** Before running any tools, output:
 
 ```
-I'll research {TOPIC} across Reddit, X, TikTok, and the web to find what's been discussed in the last 30 days.
+I'll research {TOPIC} across Reddit, X, Bluesky, TikTok, and the web to find what's been discussed in the last 30 days.
 
 Parsed intent:
 - TOPIC = {TOPIC}
@@ -145,7 +149,7 @@ Agent mode report format:
 
 ```
 ## Research Report: {TOPIC}
-Generated: {date} | Sources: Reddit, X, YouTube, TikTok, HN, Polymarket, Web
+Generated: {date} | Sources: Reddit, X, Bluesky, YouTube, TikTok, HN, Polymarket, Web
 
 ### Key Findings
 [3-5 bullet points, highest-signal insights with citations]
@@ -156,6 +160,28 @@ Generated: {date} | Sources: Reddit, X, YouTube, TikTok, HN, Polymarket, Web
 ### Stats
 {The standard stats block}
 ```
+
+---
+
+## If QUERY_TYPE = COMPARISON
+
+When the user asks "X vs Y", run THREE research passes in parallel:
+
+**Pass 1 + 2 (parallel Bash calls):**
+```bash
+# Run BOTH of these as parallel Bash tool calls in a single message:
+python3 "${SKILL_ROOT}/scripts/last30days.py" {TOPIC_A} --emit=compact --no-native-web --save-dir=~/Documents/Last30Days
+python3 "${SKILL_ROOT}/scripts/last30days.py" {TOPIC_B} --emit=compact --no-native-web --save-dir=~/Documents/Last30Days
+```
+
+**Pass 3 (after passes 1+2 complete):**
+```bash
+python3 "${SKILL_ROOT}/scripts/last30days.py" "{TOPIC_A} vs {TOPIC_B}" --emit=compact --no-native-web --save-dir=~/Documents/Last30Days
+```
+
+Then do WebSearch for: `{TOPIC_A} vs {TOPIC_B} comparison 2026` and `{TOPIC_A} vs {TOPIC_B} which is better`.
+
+**Skip the normal Step 1 below** - go directly to the comparison synthesis format (see "If QUERY_TYPE = COMPARISON" in the synthesis section).
 
 ---
 
@@ -321,6 +347,53 @@ When user asks "best X" or "top X", they want a LIST of specific things:
 **GOOD synthesis for "best Claude Code skills":**
 > "Most mentioned skills: /commit (5 mentions), remotion skill (4x), git-worktree (3x), /pr (3x). The Remotion announcement got 16K likes on X."
 
+### If QUERY_TYPE = COMPARISON
+
+Structure the output as a side-by-side comparison using data from all three research passes:
+
+```
+# {TOPIC_A} vs {TOPIC_B}: What the Community Says (Last 30 Days)
+
+## Quick Verdict
+[1-2 sentence data-driven summary: which one the community prefers and why, with source counts]
+
+## {TOPIC_A}
+**Community Sentiment:** [Positive/Mixed/Negative] ({N} mentions across {sources})
+
+**Strengths (what people love)**
+- [Point 1 with source attribution]
+- [Point 2]
+
+**Weaknesses (common complaints)**
+- [Point 1 with source attribution]
+- [Point 2]
+
+## {TOPIC_B}
+**Community Sentiment:** [Positive/Mixed/Negative] ({N} mentions across {sources})
+
+**Strengths (what people love)**
+- [Point 1 with source attribution]
+- [Point 2]
+
+**Weaknesses (common complaints)**
+- [Point 1 with source attribution]
+- [Point 2]
+
+## Head-to-Head
+[Synthesis from the "A vs B" combined search - what people say when directly comparing]
+
+| Dimension | {TOPIC_A} | {TOPIC_B} |
+|-----------|-----------|-----------|
+| [Key dimension 1] | [A's position] | [B's position] |
+| [Key dimension 2] | [A's position] | [B's position] |
+| [Key dimension 3] | [A's position] | [B's position] |
+
+## The Bottom Line
+Choose {TOPIC_A} if... Choose {TOPIC_B} if... (based on actual community data, not assumptions)
+```
+
+Then show combined stats from all three passes and the standard invitation section.
+
 ### For all QUERY_TYPEs
 
 Identify from the ACTUAL RESEARCH OUTPUT:
@@ -428,6 +501,7 @@ KEY PATTERNS from the research:
 ├─ 🎵 TikTok: {N} videos │ {N} views │ {N} likes │ {N} with captions
 ├─ 📸 Instagram: {N} reels │ {N} views │ {N} likes │ {N} with captions
 ├─ 🟡 HN: {N} stories │ {N} points │ {N} comments
+├─ 🦋 Bluesky: {N} posts │ {N} likes │ {N} reposts
 ├─ 📊 Polymarket: {N} markets │ {short summary of up to 5 most relevant market odds, e.g. "Championship: 12%, #1 Seed: 28%, Big 12: 64%, vs Kansas: 71%"}
 ├─ 🌐 Web: {N} pages — Source Name, Source Name, Source Name
 └─ 🗣️ Top voices: @{handle1} ({N} likes), @{handle2} │ r/{sub1}, r/{sub2}
@@ -483,6 +557,16 @@ I'm now an expert on {TOPIC}. Some things you could ask:
 - [Specific follow-up question about the biggest story]
 - [Question about implications of a key development]
 - [Question about what might happen next based on current trajectory]
+```
+
+**If QUERY_TYPE = COMPARISON:**
+```
+---
+I've compared {TOPIC_A} vs {TOPIC_B} using the latest community data. Some things you could ask:
+- [Deep dive into {TOPIC_A} alone with /last30 {TOPIC_A}]
+- [Deep dive into {TOPIC_B} alone with /last30 {TOPIC_B}]
+- [Focus on a specific dimension from the comparison table]
+- [Look at a different time period with --days=7 or --days=90]
 ```
 
 **If QUERY_TYPE = GENERAL:**
